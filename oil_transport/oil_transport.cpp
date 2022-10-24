@@ -49,14 +49,14 @@ void OutputArray(T mas)
 	}
 }
 
-template <typename T> 
-void OutputArrayToFile(ofstream& out, T mas)
-{
-	for (auto& element : mas)
-	{
-		out << element.first << endl << element.second << endl;
-	}
-}
+//template <typename T> 
+//void OutputArrayToFile(ofstream& out, T mas)
+//{
+//	for (auto& element : mas)
+//	{
+//		out << element.first << endl << element.second << endl;
+//	}
+//}
 
 ostream& operator << (ostream& out, const tube& new_tube)
 {
@@ -66,13 +66,13 @@ ostream& operator << (ostream& out, const tube& new_tube)
 	return out;
 }
 
-fstream& operator << (fstream& out, const tube& new_tube)
-{
-	out << new_tube.length << endl
-		<< new_tube.diameter << endl
-		<< new_tube.condition << "\n\n";
-	return out;
-}
+//ofstream& operator << (ofstream& out, const tube& new_tube)
+//{
+//	out << new_tube.length << endl
+//		<< new_tube.diameter << endl
+//		<< new_tube.condition << "\n\n";
+//	return out;
+//}
 
 ostream& operator << (ostream& out, const cs& new_cs)
 {
@@ -83,14 +83,14 @@ ostream& operator << (ostream& out, const cs& new_cs)
 	return out;
 }
 
-fstream& operator << (fstream& out, const cs& new_cs)
-{
-	out << new_cs.name << endl
-		<< new_cs.rooms << endl
-		<< new_cs.active_rooms << endl
-		<< new_cs.efficiency << "\n\n";
-	return out;
-}
+//ofstream& operator << (ofstream& out, const cs& new_cs)
+//{
+//	out << new_cs.name << endl
+//		<< new_cs.rooms << endl
+//		<< new_cs.active_rooms << endl
+//		<< new_cs.efficiency << "\n\n";
+//	return out;
+//}
 
 double UserInputParameter()
 {
@@ -342,55 +342,69 @@ void EditStation(cs& new_cs)
 void Save(unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
 {
 	ofstream out("Data.txt");
-	if (tubes.empty())
+	if (out.is_open())
 	{
-		cout << "Трубы еще не созданы\n";
-	}
-	else
-	{
-		if (out.is_open())
+		if (tubes.empty())
 		{
-			out << "Трубы:" << endl;
-			OutputArrayToFile(out, stations);
+			cout << "Трубы еще не созданы\n";
 		}
-		cout << "Данные по трубам сохранены\n\n";
-	}
-	if (stations.empty())
-	{
-		cout << "КС еще не созданы\n";
-	}
-	else
-	{
-		if (out.is_open())
+		else
 		{
-			out << "КС:" << endl;
-			OutputArrayToFile(out, stations);
+			out << tubes.size() << endl;
+			for (auto& element : tubes)
+			{
+				out << element.second.id << endl;
+				out << element.second.length << endl;
+				out << element.second.diameter << endl;
+				out << element.second.condition << endl;
+			}			
+			cout << "Данные по трубам сохранены\n\n";
 		}
-		cout << "Данные по КС сохранены\n\n";
+		if (stations.empty())
+		{
+			cout << "КС еще не созданы\n";
+		}
+		else
+		{
+			out << stations.size() << endl;
+			for (auto& element : stations)
+			{
+				out << element.second.id << endl;
+				out << element.second.name << endl;
+				out << element.second.rooms << endl;
+				out << element.second.active_rooms << endl;
+				out << element.second.efficiency << endl;
+			}
+			cout << "Данные по КС сохранены\n\n";
+		}
 	}
 	out.close();
 }
 
-void Download(tube& new_tube, cs& new_cs)
+void Download(tube new_tube, cs new_cs, unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
 {
-	string current_word;
+	int number_of_elements;
 	ifstream in("Data.txt");
 	if (in.is_open())
 	{
-		in >> current_word;
-		if (current_word == "Труба")
+		in >> number_of_elements;
+		while (number_of_elements--)
 		{
+			in >> new_tube.id;
 			in >> new_tube.length;
 			in >> new_tube.diameter;
 			in >> new_tube.condition;
-			in >> current_word;
+			tubes.emplace(new_tube.id, new_tube);
 		}
-		if (current_word == "КС")
+		in >> number_of_elements;
+		while (number_of_elements--)
 		{
+			in >> new_cs.id;
 			getline(in >> ws, new_cs.name);
 			in >> new_cs.rooms;
 			in >> new_cs.active_rooms;
 			in >> new_cs.efficiency;
+			stations.emplace(new_cs.id, new_cs);
 		}
 	}
 	in.close();
@@ -436,7 +450,7 @@ int Menu(tube& new_tube, cs& new_cs, unordered_map <int, tube>& tubes, unordered
 		Save(tubes, stations);
 		return 1;
 	case 7:
-		Download(new_tube, new_cs);
+		Download(new_tube, new_cs, tubes, stations);
 		return 1;
 	case 0:
 		return 0;
