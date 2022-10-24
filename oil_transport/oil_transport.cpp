@@ -23,24 +23,6 @@ struct cs
 };
 
 template <typename T>
-int FindLastId(T mas)
-{
-	if (mas.empty())
-	{
-		return 1;
-	}
-	else
-	{
-		int last_id{};
-		for (auto& element : mas)
-		{
-			last_id = element.first + 1;
-		}
-		return last_id;
-	}
-}
-
-template <typename T>
 void OutputArray(T mas)
 {
 	for (auto& element : mas)
@@ -48,15 +30,6 @@ void OutputArray(T mas)
 		cout << element.first << endl << element.second << endl;
 	}
 }
-
-//template <typename T> 
-//void OutputArrayToFile(ofstream& out, T mas)
-//{
-//	for (auto& element : mas)
-//	{
-//		out << element.first << endl << element.second << endl;
-//	}
-//}
 
 ostream& operator << (ostream& out, const tube& new_tube)
 {
@@ -66,14 +39,6 @@ ostream& operator << (ostream& out, const tube& new_tube)
 	return out;
 }
 
-//ofstream& operator << (ofstream& out, const tube& new_tube)
-//{
-//	out << new_tube.length << endl
-//		<< new_tube.diameter << endl
-//		<< new_tube.condition << "\n\n";
-//	return out;
-//}
-
 ostream& operator << (ostream& out, const cs& new_cs)
 {
 	out << "Название: " << new_cs.name << endl
@@ -82,15 +47,6 @@ ostream& operator << (ostream& out, const cs& new_cs)
 		<< "Эффективность: " << new_cs.efficiency << "\n\n";
 	return out;
 }
-
-//ofstream& operator << (ofstream& out, const cs& new_cs)
-//{
-//	out << new_cs.name << endl
-//		<< new_cs.rooms << endl
-//		<< new_cs.active_rooms << endl
-//		<< new_cs.efficiency << "\n\n";
-//	return out;
-//}
 
 double UserInputParameter()
 {
@@ -234,9 +190,35 @@ string ReadName(ifstream& in)
 	return name;
 }
 
+int GetCorrectId(int min, int max)
+{
+	int x;
+	while ((cin>>x).fail() || x>max || x<min)
+	{
+		cout << "Введенные данные не корректны\n";
+		cin.clear();
+		cin.ignore(1000, '\n');
+	}
+	return x;
+}
+
+tube& SelectTube(unordered_map <int, tube>& tubes)
+{
+	cout << "Введите номер трубы:" << endl;
+	int id = GetCorrectId(1, tubes.size());
+	return tubes[id];
+}
+
+cs& SelectCS(unordered_map <int, cs>& stations)
+{
+	cout << "Введите номер трубы:" << endl;
+	int id = GetCorrectId(1, stations.size());
+	return stations[id];
+}
+
 void CreateTube(tube& new_tube, unordered_map <int, tube>& tubes)
 {
-	new_tube.id = FindLastId(tubes);
+	new_tube.id = tubes.size() + 1;
 	cout << "Введите длину в метрах (используйте <.>): ";
 	new_tube.length = UserInputParameter();
 	cout << "Введите диаметр в метрах (используйте <.>): ";
@@ -247,7 +229,7 @@ void CreateTube(tube& new_tube, unordered_map <int, tube>& tubes)
 
 void CreateStation(cs& new_cs, unordered_map <int, cs>& stations)
 {
-	new_cs.id = FindLastId(stations);
+	new_cs.id = stations.size() + 1;
 	cout << "Введите название: ";
 	getline(cin >> ws, new_cs.name);
 	cout << "Укажите количество цехов: ";
@@ -381,8 +363,10 @@ void Save(unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
 	out.close();
 }
 
-void Download(tube new_tube, cs new_cs, unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
+void Download(unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
 {
+	tube new_tube; 
+	cs new_cs;
 	int number_of_elements;
 	ifstream in("Data.txt");
 	if (in.is_open())
@@ -423,8 +407,10 @@ void ShowMenu()
 	cout << "0. Выход\n";
 }
 
-int Menu(tube& new_tube, cs& new_cs, unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
+int Menu(unordered_map <int, tube>& tubes, unordered_map <int, cs>& stations)
 {
+	tube new_tube;
+	cs new_cs;
 	int user_choice;
 	do { cin >> user_choice; } while (IsCorrectMenuChoice(user_choice) == false);
 	switch (user_choice)
@@ -441,16 +427,16 @@ int Menu(tube& new_tube, cs& new_cs, unordered_map <int, tube>& tubes, unordered
 		ViewAllObjects(tubes, stations);
 		return 1;
 	case 4:
-		EditTube(new_tube);
+		EditTube(SelectTube(tubes));
 		return 1;
 	case 5:
-		EditStation(new_cs);
+		EditStation(SelectCS(stations));
 		return 1;
 	case 6:
 		Save(tubes, stations);
 		return 1;
 	case 7:
-		Download(new_tube, new_cs, tubes, stations);
+		Download(tubes, stations);
 		return 1;
 	case 0:
 		return 0;
@@ -463,9 +449,7 @@ int Menu(tube& new_tube, cs& new_cs, unordered_map <int, tube>& tubes, unordered
 int main()
 {
 	setlocale(0, "");
-	tube new_tube;
-	cs new_cs;
 	unordered_map <int, tube> tubes = {};
 	unordered_map <int, cs> stations = {};
-	do { ShowMenu(); } while (Menu(new_tube, new_cs, tubes, stations) != 0);
+	do { ShowMenu(); } while (Menu(tubes, stations) != 0);
 }
