@@ -2,25 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "Tube.h"
+#include "CS.h"
 
 using namespace std;
-
-struct tube
-{
-	int id = 0;
-	double length = 0;
-	double diameter = 0;
-	int condition = 0;
-};
-
-struct cs
-{
-	int id = 0;
-	string name;
-	int rooms = 0;
-	int active_rooms = 0;
-	int efficiency = 0;
-};
 
 template <typename T>
 void OutputArray(T mas)
@@ -29,23 +14,6 @@ void OutputArray(T mas)
 	{
 		cout << element.first << endl << element.second << endl;
 	}
-}
-
-ostream& operator << (ostream& out, const tube& new_tube)
-{
-	out << "Длина трубы: " << new_tube.length << endl
-		<< "Диаметр трубы: " << new_tube.diameter << endl
-		<< "Состояние: " << new_tube.condition << "\n\n";
-	return out;
-}
-
-ostream& operator << (ostream& out, const cs& new_cs)
-{
-	out << "Название: " << new_cs.name << endl
-		<< "Всего цехов: " << new_cs.rooms << endl
-		<< "Цехи в работе: " << new_cs.active_rooms << endl
-		<< "Эффективность: " << new_cs.efficiency << "\n\n";
-	return out;
 }
 
 double UserInputParameter()
